@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: whoami-${nsnumber}
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: whoami-${nsnumber}
+  namespace: whoami-${nsnumber}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: whoami-${nsnumber}
+  template:
+    metadata:
+      labels:
+        app: whoami-${nsnumber}
+    spec:
+      containers:
+      - name: whoami
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "50m"
+          limits:
+            memory: "32Mi"
+            cpu: "50m"  
+        image: traefik/whoami
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-svc-${nsnumber}
+  namespace: whoami-${nsnumber}
+  labels:
+    app: whoami-${nsnumber}
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    name: whoami-${nsnumber}
+  selector:
+    app: whoami-${nsnumber}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami-ing-${nsnumber}
+  namespace: whoami-${nsnumber}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`whoami-${nsnumber}.docker.localhost`)
+      services:
+        - name: whoami-svc-${nsnumber}
+          port: 80
+  tls: {}

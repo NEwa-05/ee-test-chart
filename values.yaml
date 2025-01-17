@@ -1,0 +1,88 @@
+image:
+  registry: docker.io
+  repository: traefik/traefikee
+  tag: "v2.12.1"
+  pullPolicy: IfNotPresent
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+log:
+ level: DEBUG
+ format: JSON
+
+registry:
+  enabled: true
+
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  staticConfig:
+    configMap:
+      key: "static.yaml"
+    content:
+
+proxy:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "300m"
+      memory: "384Mi"
+  ports:
+    - name: traefik
+      port: 9000
+    - name: http
+      port: 18080
+    - name: https
+      port: 18443
+    - name: metrics
+      port: 8080
+  serviceType: LoadBalancer
+  servicePorts:
+    - name: http
+      port: 18080
+      targetPort: http
+    - name: https
+      port: 18443
+      targetPort: https
+  enablePluginWait: true
+  readinessProbe:
+    httpGet:
+      path: /ping
+      port: traefik
+    failureThreshold: 1
+    initialDelaySeconds: 2
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 2
+  livenessProbe:
+    httpGet:
+      path: /ping
+      port: traefik
+    failureThreshold: 3
+    initialDelaySeconds: 2
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 2
+  securityContext:
+    runAsUser: 65532
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+  tolerations: []
+priorityClassName: ""
+
+mesh:
+  enabled: false
+  kubedns: false
+  clusterDomain: "cluster.local"

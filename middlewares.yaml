@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: jwt
+  namespace: traefikee
+spec:
+  plugin:
+    jwtAuth:
+      forwardAuthorization: true
+      source: auth-backstage-jwt-d
+
+
+
+      

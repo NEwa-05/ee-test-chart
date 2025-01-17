@@ -1,0 +1,39 @@
+entryPoints:
+  web:
+    address: ":18080"
+  websecure:
+    address: ":18443"
+  traefik:
+    address: ":9000"
+  metrics:
+    address: ":8080"
+
+ping:
+  entryPoint: "traefik"
+
+api:
+  dashboard: true
+apiportal:
+  path: /openapi.yaml
+
+log:
+  level: DEBUG
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: keep
+
+providers:
+  kubernetesCRD:
+    allowCrossNamespace: true
+    allowEmptyServices: true
+    allowExternalNameServices: true
+    # nativeLBByDefault: true
+
+cluster:
+  cleanup:
+    gracePeriod: 2m
+
+            
