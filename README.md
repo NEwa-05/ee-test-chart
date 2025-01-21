@@ -45,7 +45,7 @@ helm upgrade --install traefikee ~/Documents/traefik/git/traefikee-helm-chart/tr
 ## deploy app
 
 ```bash
-for i in {0..4}; do
+for i in {0..9}; do
   export nsnumber=${i}
   envsubst < apps/whoami.yaml | kubectl apply -f -
 done
@@ -60,6 +60,6 @@ cd ..
 ```
 
 ```bash
-kubectl create configmap k6-script --from-file apps/script.js
+kubectl create configmap k6-script --from-file apps/script.js -o yaml --dry-run=client | kubectl apply -f -
 kubectl apply -f apps/k6.yaml
 ```

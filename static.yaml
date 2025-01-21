@@ -27,6 +27,7 @@ accessLog:
 
 providers:
   kubernetesCRD:
+    throttleDuration: "5s"
     allowCrossNamespace: true
     allowEmptyServices: true
     allowExternalNameServices: true
@@ -35,5 +36,3 @@ providers:
 cluster:
   cleanup:
     gracePeriod: 2m
-
-            
