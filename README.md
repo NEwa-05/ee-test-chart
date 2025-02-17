@@ -49,6 +49,7 @@ for i in {0..9}; do
   export nsnumber=${i}
   envsubst < apps/whoami.yaml | kubectl apply -f -
 done
+```
 
 
 ## deploy k6
@@ -59,7 +60,20 @@ make deploy
 cd ..
 ```
 
+### apply test script
+
 ```bash
 kubectl create configmap k6-script --from-file apps/script.js -o yaml --dry-run=client | kubectl apply -f -
+```
+
+### start the test
+
+```bash
 kubectl apply -f apps/k6.yaml
+```
+
+## start event noise
+
+```bash
+bash chaos.sh
 ```

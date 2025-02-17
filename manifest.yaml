@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: delay-server
+  labels:
+    app: delay-server
+spec:
+  containers:
+    - name: delay-server
+      image: python:3.9-slim
+      command:
+        - python3
+        - -c
+        - |
+          import http.server
+          import time
+
+          class CustomHandler(http.server.BaseHTTPRequestHandler):
+              def do_POST(self):
+                  self.send_response(200)
+                  self.end_headers()
+                  time.sleep(3600)  # Indefinite sleep (1 hour here)
+                  self.wfile.write(b"Processed after delay")
+
+              def log_message(self, format, *args):
+                  pass  # Suppress logging for cleaner output
+
+          if __name__ == "__main__":
+              server = http.server.HTTPServer(("0.0.0.0", 80), CustomHandler)
+              print("Serving on port 80")
+              server.serve_forever()
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: delay-server
+  name: test-timeout-svc
+spec:
+  ports:
+  - name: 80-8080
+    port: 80
+  selector:
+    app: delay-server
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: test-timeout-ingress
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`test-timeout.docker.localhost`)
+    services:
+    - name: test-timeout-svc
+      port: 80
+      serversTransport: mytransport
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: mytransport
+spec:
+    forwardingTimeouts:
+      responseHeaderTimeout: "30s"
